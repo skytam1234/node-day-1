@@ -1,24 +1,19 @@
 {
-  "tasks": [
-    {
-      "id": 1,
-      "title": "pót",
-      "isCompleted": false
-    },
-    {
-      "id": 4,
-      "title": "ádad",
-      "isCompleted": false
-    },
-    {
-      "id": 5,
-      "title": "adsad",
-      "isCompleted": false
-    },
-    {
-      "id": 6,
-      "title": "",
-      "isCompleted": false
-    }
-  ]
+    "tasks": [
+        {
+            "id": 1,
+            "title": "pót",
+            "isCompleted": false
+        },
+        {
+            "id": 4,
+            "title": "ádad",
+            "isCompleted": false
+        },
+        {
+            "id": 5,
+            "title": "adsad",
+            "isCompleted": false
+        }
+    ]
 }
