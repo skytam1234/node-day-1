@@ -16,11 +16,16 @@ function findIdMax() {
     });
     return max + 1;
 }
-function serverResponse(res, data) {
+const allowOrigin = ["http://localhost:5173/", "https://skytam1234.github.io/"];
+function serverResponse(req, res, data) {
+    const allow = allowOrigin.find(
+        (item) =>
+            item.toLocaleLowerCase() === req.header.origin.toLocaleLowerCase()
+    );
     res.writeHead(data.status, {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+        "Access-Control-Allow-Origin": allow,
+        "Access-Control-Allow-Methods": "PUT,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
     });
     res.end(JSON.stringify(data));
@@ -33,7 +38,7 @@ const server = createServer((req, res) => {
     if (req.method === "OPTIONS") {
         res.writeHead(204, {
             "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+            "Access-Control-Allow-Methods": "PUT,PATCH,DELETE,OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type",
         });
         res.end();
@@ -42,7 +47,7 @@ const server = createServer((req, res) => {
     //[Get] /api/tasks
     if (req.method === "GET" && req.url === "/api/tasks") {
         response.data = db.tasks;
-        serverResponse(res, response);
+        serverResponse(req, res, response);
         return;
     }
     //[Get] /api/tasks/1
@@ -55,7 +60,7 @@ const server = createServer((req, res) => {
             response.status = 404;
             response.message = "Resource not found";
         }
-        serverResponse(res, response);
+        serverResponse(req, res, response);
         return;
     }
     // [POST] /api/tasks/1
@@ -81,7 +86,7 @@ const server = createServer((req, res) => {
             writeDB(db);
             response.status = 201;
             response.data = newStask;
-            serverResponse(res, response);
+            serverResponse(req, res, response);
         });
         return;
     }
@@ -98,14 +103,14 @@ const server = createServer((req, res) => {
                 if (title === undefined || isCompleted === undefined) {
                     response.status = 400;
                     response.message = "Both title and completed required";
-                    serverResponse(res, response);
+                    serverResponse(req, res, response);
                     return;
                 }
                 const task = db.tasks.find((_task) => _task.id === id);
                 if (!task) {
                     response.status = 404;
                     response.message = "Task not found";
-                    serverResponse(res, response);
+                    serverResponse(req, res, response);
                     return;
                 }
                 task.title = title;
@@ -114,12 +119,12 @@ const server = createServer((req, res) => {
 
                 response.status = 200;
                 response.data = task;
-                serverResponse(res, response);
+                serverResponse(req, res, response);
                 return;
             } catch (error) {
                 response.status = 400;
                 response.message = "Invalid JSON";
-                serverResponse(res, response);
+                serverResponse(req, res, response);
                 return;
             }
         });
@@ -139,19 +144,19 @@ const server = createServer((req, res) => {
                 if (!task) {
                     response.status = 404;
                     response.message = " Task not found";
-                    serverResponse(res, response);
+                    serverResponse(req, res, response);
                 }
                 if (title !== undefined) task.title = title;
                 if (isCompleted !== undefined) task.isCompleted = isCompleted;
                 response.status = 200;
                 response.data = task;
                 writeDB(db);
-                serverResponse(res, response);
+                serverResponse(req, res, response);
                 return;
             } catch (error) {
                 response.status = 400;
                 response.message = "Invalid JSON";
-                serverResponse(res, response);
+                serverResponse(req, res, response);
                 return;
             }
         });
@@ -163,18 +168,18 @@ const server = createServer((req, res) => {
         const index = db.tasks.findIndex((_task) => _task.id === id);
         if (index === -1) {
             (response.status = 404), (response.message = "Task not found");
-            serverResponse(res, response);
+            serverResponse(req, res, response);
             return;
         }
         const task = db.tasks.splice(index, 1)[0];
         response.status = 200;
         response.data = task;
         writeDB(db);
-        serverResponse(res, response);
+        serverResponse(req, res, response);
         return;
     }
 
-    serverResponse(res, {
+    serverResponse(req, res, {
         status: 200,
         data: "ok",
     });

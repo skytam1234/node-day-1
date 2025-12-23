@@ -16,7 +16,6 @@ export const taskSlice = createSlice({
             const id = action.payload;
             state.list = state.list.filter((task) => task.id !== id);
         },
-
         updateListContent: (state, action) => {
             const { id, isCompleted } = action.payload;
             const task = state.list.find((_task) => _task.id === id);

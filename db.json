@@ -6,14 +6,14 @@
       "isCompleted": false
     },
     {
-      "id": 2,
-      "title": "b",
-      "isCompleted": false
-    },
-    {
       "id": 3,
       "title": "c",
-      "isCompleted": false
+      "isCompleted": true
+    },
+    {
+      "id": 4,
+      "title": "b",
+      "isCompleted": true
     }
   ]
 }
