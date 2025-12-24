@@ -16,20 +16,25 @@ function findIdMax() {
     });
     return max + 1;
 }
-const allowOrigin = ["http://localhost:5173/", "https://skytam1234.github.io/"];
+const port = 3000;
+const allowOrigin = ["http://localhost:5173", "https://skytam1234.github.io"];
 function serverResponse(req, res, data) {
     const allow = allowOrigin.find(
         (item) =>
-            item.toLocaleLowerCase() === req.header.origin.toLocaleLowerCase()
+            item.toLocaleLowerCase() === req.headers.origin.toLocaleLowerCase()
     );
-    res.writeHead(data.status, {
+    const config = {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": allow,
         "Access-Control-Allow-Methods": "PUT,PATCH,DELETE,OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type",
-    });
+    };
+    if (allow) {
+        config["Access-Control-Allow-Origin"] = allow;
+    }
+    res.writeHead(data.status, config);
     res.end(JSON.stringify(data));
 }
+
 const server = createServer((req, res) => {
     let response = {
         status: 200,
@@ -185,6 +190,6 @@ const server = createServer((req, res) => {
     });
 });
 
-server.listen(3000, "127.0.0.1", () => {
-    console.log(`Listen on 127.0.0.1:3000`);
+server.listen(port, "127.0.0.1", () => {
+    console.log(`Listen on 127.0.0.1:${port}`);
 });
