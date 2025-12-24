@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { readDB, writeDB } from "./ultils/jsonDB.js";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 let taskId = 1;
 let db = {};
@@ -49,13 +50,13 @@ const server = createServer((req, res) => {
         res.end();
         return;
     }
-    //[Get] /api/tasks
+
     if (req.method === "GET" && req.url === "/api/tasks") {
         response.data = db.tasks;
         serverResponse(req, res, response);
         return;
     }
-    //[Get] /api/tasks/1
+
     if (req.method === "GET" && req.url.startsWith("/api/tasks")) {
         const id = +req.url.split("/").pop();
         const task = db.tasks.find((_task) => _task.id === id);
@@ -68,7 +69,7 @@ const server = createServer((req, res) => {
         serverResponse(req, res, response);
         return;
     }
-    // [POST] /api/tasks/1
+
     if (req.method === "POST" && req.url.startsWith("/api/tasks")) {
         let body = "";
         req.on("data", (buffer) => {
@@ -95,7 +96,7 @@ const server = createServer((req, res) => {
         });
         return;
     }
-    // [PUT] /api/tasks/1
+
     if (req.method === "PUT" && req.url.startsWith("/api/tasks")) {
         let body = "";
         const id = +req.url.split("/").pop();
@@ -135,7 +136,7 @@ const server = createServer((req, res) => {
         });
         return;
     }
-    // [PATCH] /api/tasks/1
+
     if (req.method === "PATCH" && req.url.startsWith("/api/tasks")) {
         let body = "";
         const id = +req.url.split("/").pop();
@@ -167,7 +168,7 @@ const server = createServer((req, res) => {
         });
         return;
     }
-    // [Delete] /api/tasks/1
+
     if (req.method === "DELETE" && req.url.startsWith("/api/tasks")) {
         const id = +req.url.split("/").pop();
         const index = db.tasks.findIndex((_task) => _task.id === id);
@@ -183,6 +184,54 @@ const server = createServer((req, res) => {
         serverResponse(req, res, response);
         return;
     }
+    if (req.url.includes("/bypass-cors")) {
+        const fullUrl = new URL(req.url, `http://${req.headers.host}`);
+        const queryParams = fullUrl.searchParams;
+        const targetUrl = queryParams.get("url");
+
+        if (!targetUrl) {
+            response.status = 400;
+            response.message = "Missing url parameter";
+            serverResponse(req, res, response);
+            return;
+        }
+        let body = "";
+        req.on("data", (buffer) => {
+            body += buffer.toString();
+        });
+        req.on("end", () => {
+            const options = {
+                method: req.method,
+            };
+            if (!["GET", "HEAD"].includes(req.method) && body) {
+                options.body = body;
+            }
+            fetch(targetUrl, options)
+                .then((res) => {
+                    const isJson = res.headers
+                        .get("Content-Type")
+                        ?.includes("application/json");
+
+                    return isJson ? res.json() : res.text();
+                })
+                .then((resuilt) => {
+                    response.status = 200;
+                    response.data = resuilt.data;
+                    console.log(response);
+                    return serverResponse(req, res, response);
+                })
+                .catch((error) => {
+                    response.status = 400;
+                    response.message = "Invalid server";
+                    console.log(error);
+
+                    return serverResponse(req, res, response);
+                });
+        });
+
+        return;
+    }
+    console.log(req.url);
 
     serverResponse(req, res, {
         status: 200,

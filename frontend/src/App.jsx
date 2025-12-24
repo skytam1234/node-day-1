@@ -7,6 +7,7 @@ import {
     removeTask,
     updateListContent,
 } from "./feature/taskSlice";
+import { useEffect } from "react";
 
 function App() {
     const dispatch = useDispatch();
@@ -20,6 +21,13 @@ function App() {
             title: "",
         },
     });
+    useEffect(() => {
+        fetch(
+            "http://localhost:3000/bypass-cors?url=https://api-gateway.fullstack.edu.vn/api/analytics"
+        )
+            .then((res) => res.json())
+            .then((res) => console.log(res));
+    }, []);
     useFetchListTask();
     const listTask = useListTask();
     const submit = async (data) => {
